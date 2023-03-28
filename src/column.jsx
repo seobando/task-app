@@ -6,7 +6,7 @@ import Task from "./task";
 const Container = styled.div`
   margin: 8px;
   border: 1px solid lightgrey;
-  background-color:white;
+  background-color: white;
   border-radius: 2px;
   width: 220px;
 
@@ -19,10 +19,25 @@ const Title = styled.h3`
 const TaskList = styled.div`
   padding: 8px;
   transition: background-color 0.2s ease;
-  background-color: ${(props) => (props.isDraggingOver ? "skyblue" : "inherit")};
+  background-color: ${(props) =>
+    props.isDraggingOver ? "skyblue" : "inherit"};
   flex-grow: 1;
   min-height: 100px;
 `;
+
+class InnerList extends React.Component {
+  shouldComponentUpdate(nextProps) {
+    if (nextProps.tasks === this.props.tasks) {
+      return false;
+    }
+    return true;
+  }
+  render() {
+    return this.props.tasks.map((task, index) => (
+      <Task key={task.id} task={task} index={index} />
+    ));
+  }
+}
 
 export default class Column extends React.Component {
   render() {
@@ -30,7 +45,9 @@ export default class Column extends React.Component {
       <Draggable draggableId={this.props.column.id} index={this.props.index}>
         {(provided) => (
           <Container {...provided.draggableProps} ref={provided.innerRef}>
-            <Title {...provided.dragHandleProps}>{this.props.column.title}</Title>
+            <Title {...provided.dragHandleProps}>
+              {this.props.column.title}
+            </Title>
             <Droppable
               droppableId={this.props.column.id}
               isDropDisabled={this.props.isDropDisabled}
@@ -42,9 +59,7 @@ export default class Column extends React.Component {
                   {...provided.droppableProps}
                   isDraggingOver={snapshot.isDraggingOver}
                 >
-                  {this.props.tasks.map((task, index) => (
-                    <Task key={task.id} task={task} index={index} />
-                  ))}
+                  <InnerList tasks={this.props.tasks} />
                   {provided.placeholder}
                 </TaskList>
               )}
